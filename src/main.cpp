@@ -195,12 +195,9 @@ void ClickedStart()
     EnableWindow(mouse.ButtonStop, TRUE);
     mouse.isRandomDelay = IsDlgButtonChecked(mouse.Dlg, IDC_RANDOM);
     mouse.direction = ComboBox_GetCurSel(mouse.ComboDirection);
-    if (!mouse.isRandomDelay)
-    {
-        wchar_t delay[10];
-        GetDlgItemText(mouse.Dlg, IDC_DELAY, delay, 10);
-        mouse.delay = _wtol(delay);
-    }
+    wchar_t delay[10];
+    GetDlgItemTextW(mouse.Dlg, IDC_DELAY, delay, 10);
+    mouse.delay = _wtol(delay);
     CreateThread(nullptr, 0, &mouseClickThread, nullptr, 0, nullptr); //&mouse.mouseClickThreadID);
 }
 
