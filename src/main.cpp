@@ -201,24 +201,24 @@ void ClickedStart()
         GetDlgItemText(mouse.Dlg, IDC_DELAY, delay, 10);
         mouse.delay = _wtol(delay);
     }
-    CreateThread(nullptr, 0, &mouseClickThread, nullptr, 0, mouse.mouseClickThreadID);
+    CreateThread(nullptr, 0, &mouseClickThread, nullptr, 0, nullptr); //&mouse.mouseClickThreadID);
 }
 
 void ClickedStop()
 {
     mouse.flag = false;
+    // ResumeThread(&mouse.mouseClickThreadID);
     EnableWindow(mouse.ButtonStart, TRUE);
     EnableWindow(mouse.TextDelay, TRUE);
     EnableWindow(mouse.ComboKey, TRUE);
     EnableWindow(mouse.ComboDirection, TRUE);
     EnableWindow(mouse.CheckRandom, TRUE);
     EnableWindow(mouse.ButtonStop, FALSE);
-    ResumeThread(mouse.mouseClickThreadID);
 }
 
 DWORD WINAPI mouseClickThread(LPVOID lpThreadParameter)
 {
-    while (mouse.flag)
+    do
     {
         switch (mouse.direction)
         {
@@ -236,11 +236,11 @@ DWORD WINAPI mouseClickThread(LPVOID lpThreadParameter)
         {
             DWORD sleep = 1 + rand() % mouse.delay;
             wchar_t sleept[10];
-            SetDlgItemText(mouse.Dlg, IDC_DELAY, _itow(sleep, sleept, 10));
+            SetDlgItemTextW(mouse.Dlg, IDC_DELAY, _itow(sleep, sleept, 10));
             Sleep(sleep);
         }
         else
             Sleep(mouse.delay);
-    }
+    } while (mouse.flag);
     return 0;
 }

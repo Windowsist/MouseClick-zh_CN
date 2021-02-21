@@ -11,7 +11,7 @@ struct
         CheckRandom,
         TextDelay,
         ButtonStart, ButtonStop;
-    LPDWORD mouseClickThreadID = nullptr;
+    // DWORD mouseClickThreadID;
     bool flag = false;
     BOOL isRandomDelay = FALSE;
     DWORD delay = 1000L;
