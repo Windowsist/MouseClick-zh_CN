@@ -6,7 +6,6 @@
 
 struct
 {
-    HICON icon;
     HWND Dlg,
         ComboKey, ComboDirection,
         CheckRandom,
@@ -32,6 +31,10 @@ struct
             VK_F12};
     int direction = 0;
 } mouse;
+
+ATOM MyRegisterClass(HINSTANCE hInstance);
+
+BOOL InitInstance(HINSTANCE hInstance, int nCmdShow);
 
 INT_PTR CALLBACK DlgProc(HWND, UINT, WPARAM, LPARAM);
 

@@ -5,31 +5,15 @@ int
     wWinMain(_In_ HINSTANCE hInstance,
              _In_opt_ HINSTANCE hPrevInstance,
              _In_ LPWSTR lpCmdLine,
-             _In_ int nShowCmd)
+             _In_ int nCmdShow)
 {
+    MyRegisterClass(hInstance);
+
     // 执行应用程序初始化:
-    mouse.icon = LoadIconW(hInstance, MAKEINTRESOURCEW(IDI_ICON1));
-
-    HWND hDlg = CreateDialogParamW(hInstance, MAKEINTRESOURCEW(IDD_DIALOG1), nullptr, DlgProc, 0L);
-
-    if (!hDlg)
+    if (!InitInstance(hInstance, nCmdShow))
     {
-        return 1;
+        return FALSE;
     }
-
-
-    if (!RegisterHotKey(hDlg, 1, MOD_NOREPEAT | MOD_CONTROL, VK_F1)) //0x42 is 'b'
-    {
-        MessageBoxW(nullptr, L"注册快捷键失败", L"警告", MB_ICONWARNING);
-    }
-
-    if (!RegisterHotKey(hDlg, 2, MOD_NOREPEAT, VK_F1)) //0x42 is 'b'
-    {
-        MessageBoxW(nullptr, L"注册快捷键失败", L"警告", MB_ICONWARNING);
-    }
-
-    ShowWindow(hDlg, nShowCmd);
-    UpdateWindow(hDlg);
 
     // 主消息循环:
     MSG msg;
@@ -42,14 +26,73 @@ int
     return (int)msg.wParam;
 }
 
+//
+//  函数: MyRegisterClass()
+//
+//  目标: 注册窗口类。
+//
+ATOM MyRegisterClass(HINSTANCE hInstance)
+{
+    WNDCLASSEXW wcex;
+
+    wcex.cbSize = sizeof(WNDCLASSEX);
+
+    wcex.style = CS_HREDRAW | CS_VREDRAW;
+    wcex.lpfnWndProc = DefDlgProc;
+    wcex.cbClsExtra = 0;
+    wcex.cbWndExtra = DLGWINDOWEXTRA;
+    wcex.hInstance = hInstance;
+    wcex.hIcon = LoadIconW(hInstance, MAKEINTRESOURCEW(IDI_ICON1));
+    wcex.hCursor = LoadCursorW(nullptr, IDC_ARROW);
+    wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+    wcex.lpszMenuName = nullptr;
+    wcex.lpszClassName = L"MouseClickDlg";
+    wcex.hIconSm = wcex.hIcon;
+
+    return RegisterClassExW(&wcex);
+}
+
+//
+//   函数: InitInstance(HINSTANCE, int)
+//
+//   目标: 保存实例句柄并创建主窗口
+//
+//   注释:
+//
+//        在此函数中，我们在全局变量中保存实例句柄并
+//        创建和显示主程序窗口。
+//
+BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
+{
+    HWND hDlg = CreateDialogParamW(hInstance, MAKEINTRESOURCEW(IDD_DIALOG1), nullptr, DlgProc, 0L);
+
+    if (!hDlg)
+    {
+        return FALSE;
+    }
+
+    if (!RegisterHotKey(hDlg, 1, MOD_NOREPEAT | MOD_CONTROL, VK_F1)) //0x42 is 'b'
+    {
+        MessageBoxW(nullptr, L"注册快捷键失败", L"警告", MB_ICONWARNING);
+    }
+
+    if (!RegisterHotKey(hDlg, 2, MOD_NOREPEAT, VK_F1)) //0x42 is 'b'
+    {
+        MessageBoxW(nullptr, L"注册快捷键失败", L"警告", MB_ICONWARNING);
+    }
+
+    ShowWindow(hDlg, nCmdShow);
+    UpdateWindow(hDlg);
+    return TRUE;
+}
+
+// 对话框的消息处理程序。
 INT_PTR CALLBACK DlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
     static int count = 0;
     switch (message)
     {
     case WM_INITDIALOG:
-        SendMessageW(hDlg, WM_SETICON, ICON_BIG, (LPARAM)mouse.icon);
-        SendMessageW(hDlg, WM_SETICON, ICON_SMALL, (LPARAM)mouse.icon);
         mouse.Dlg = hDlg;
         mouse.ComboKey = GetDlgItem(hDlg, IDC_KEY);
         mouse.ComboDirection = GetDlgItem(hDlg, IDC_DIRECTION);
