@@ -1,2 +1,2 @@
-# Mouse-Click
+# MouseClick
 鼠标连点器
