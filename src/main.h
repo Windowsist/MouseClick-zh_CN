@@ -13,23 +13,25 @@ struct
         ButtonStart, ButtonStop;
     // DWORD mouseClickThreadID;
     bool flag = false;
-    BOOL isRandomDelay = FALSE;
-    DWORD delay = 1000L;
-    UINT HotKeys[12] =
-        {
-            VK_F1,
-            VK_F2,
-            VK_F3,
-            VK_F4,
-            VK_F5,
-            VK_F6,
-            VK_F7,
-            VK_F8,
-            VK_F9,
-            VK_F10,
-            VK_F11,
-            VK_F12};
-    int direction = 0;
+    DWORD delay = 1000L,
+          directions[3] =
+              {MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_LEFTUP,
+               MOUSEEVENTF_MIDDLEDOWN | MOUSEEVENTF_MIDDLEUP,
+               MOUSEEVENTF_RIGHTDOWN | MOUSEEVENTF_RIGHTUP};
+    UINT HotKey,
+        HotKeys[12] =
+            {VK_F1,
+             VK_F2,
+             VK_F3,
+             VK_F4,
+             VK_F5,
+             VK_F6,
+             VK_F7,
+             VK_F8,
+             VK_F9,
+             VK_F10,
+             VK_F11,
+             VK_F12};
 } mouse;
 
 ATOM MyRegisterClass(HINSTANCE hInstance);

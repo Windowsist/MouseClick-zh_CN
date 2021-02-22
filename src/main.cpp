@@ -38,7 +38,7 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
     wcex.cbSize = sizeof(WNDCLASSEX);
 
     wcex.style = CS_HREDRAW | CS_VREDRAW;
-    wcex.lpfnWndProc = DefDlgProc;
+    wcex.lpfnWndProc = DefDlgProcW;
     wcex.cbClsExtra = 0;
     wcex.cbWndExtra = DLGWINDOWEXTRA;
     wcex.hInstance = hInstance;
@@ -89,7 +89,6 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 // 对话框的消息处理程序。
 INT_PTR CALLBACK DlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
-    static int count = 0;
     switch (message)
     {
     case WM_INITDIALOG:
@@ -121,65 +120,86 @@ INT_PTR CALLBACK DlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
         ComboBox_SetCurSel(mouse.ComboKey, 0);
         return (INT_PTR)TRUE;
     case WM_HOTKEY:
-        if ((lParam & MOD_CONTROL) == MOD_CONTROL)
+        if (HIWORD(wParam) == mouse.HotKey)
         {
-            static bool shown = true;
-            if (shown)
+            if ((lParam & MOD_CONTROL) == MOD_CONTROL)
             {
-                shown = false;
-                ShowWindow(hDlg, SW_HIDE);
+                static bool shown = true;
+                if (shown)
+                {
+                    shown = false;
+                    ShowWindow(hDlg, SW_HIDE);
+                }
+                else
+                {
+                    shown = true;
+                    ShowWindow(hDlg, SW_SHOW);
+                }
             }
+            else if (mouse.flag)
+                ClickedStop();
             else
-            {
-                shown = true;
-                ShowWindow(hDlg, SW_SHOW);
-            }
+                ClickedStart();
+            return (INT_PTR)TRUE;
         }
-        else if (mouse.flag)
-            ClickedStop();
-        else
-            ClickedStart();
         break;
     case WM_COMMAND:
         if (HIWORD(wParam) == CBN_SELCHANGE)
         {
             if ((HWND)lParam == mouse.ComboKey)
             {
-                UINT vk = mouse.HotKeys[ComboBox_GetCurSel(mouse.ComboKey)];
+                mouse.HotKey = mouse.HotKeys[ComboBox_GetCurSel(mouse.ComboKey)];
                 UnregisterHotKey(hDlg, 1);
                 UnregisterHotKey(hDlg, 2);
-                if (!RegisterHotKey(hDlg, 1, MOD_NOREPEAT | MOD_CONTROL, vk)) //0x42 is 'b'
+                if (!RegisterHotKey(hDlg, 1, MOD_NOREPEAT | MOD_CONTROL, mouse.HotKey)) //0x42 is 'b'
                 {
                     MessageBoxW(hDlg, L"注册快捷键失败", L"警告", MB_ICONWARNING);
                 }
-                if (!RegisterHotKey(hDlg, 2, MOD_NOREPEAT, vk)) //0x42 is 'b'
+                if (!RegisterHotKey(hDlg, 2, MOD_NOREPEAT, mouse.HotKey)) //0x42 is 'b'
                 {
                     MessageBoxW(hDlg, L"注册快捷键失败", L"警告", MB_ICONWARNING);
                 }
+                return (INT_PTR)TRUE;
             }
         }
-        switch (wParam)
+        else
         {
-        case IDC_START:
-            ClickedStart();
-            break;
-        case IDC_STOP:
-            ClickedStop();
-            break;
-        case IDC_TEST:
-            wchar_t countt[10];
-            count++;
-            SetDlgItemTextW(mouse.Dlg, IDC_COUNT, _itow(count, countt, 10));
-            break;
-        case IDC_RESET:
-            SetDlgItemTextW(mouse.Dlg, IDC_COUNT, L"0");
-            count = 0;
-            break;
+            int wmId = LOWORD(wParam);
+            // 分析菜单选择:
+            switch (wmId)
+            {
+            case IDC_START:
+                ClickedStart();
+                return (INT_PTR)TRUE;
+            case IDC_STOP:
+                ClickedStop();
+                return (INT_PTR)TRUE;
+            case IDC_TEST:
+            case IDC_RESET:
+            {
+                static int count = 0;
+                switch (wmId)
+                {
+                case IDC_TEST:
+                    wchar_t countt[10];
+                    SetDlgItemTextW(mouse.Dlg, IDC_COUNT, _itow(++count, countt, 10));
+                    break;
+                case IDC_RESET:
+                    SetDlgItemTextW(mouse.Dlg, IDC_COUNT, L"0");
+                    count = 0;
+                    break;
+                }
+                return (INT_PTR)TRUE;
+            }
+            }
         }
         break;
     case WM_CLOSE:
+        DestroyWindow(hDlg);
+        return (INT_PTR)TRUE;
+    case WM_DESTROY:
         PostQuitMessage(0);
-        break;
+        return (INT_PTR)TRUE;
     }
     return (INT_PTR)FALSE;
 }
@@ -193,8 +213,6 @@ void ClickedStart()
     EnableWindow(mouse.ComboDirection, FALSE);
     EnableWindow(mouse.CheckRandom, FALSE);
     EnableWindow(mouse.ButtonStop, TRUE);
-    mouse.isRandomDelay = IsDlgButtonChecked(mouse.Dlg, IDC_RANDOM);
-    mouse.direction = ComboBox_GetCurSel(mouse.ComboDirection);
     wchar_t delay[10];
     GetDlgItemTextW(mouse.Dlg, IDC_DELAY, delay, 10);
     mouse.delay = _wtol(delay);
@@ -215,29 +233,26 @@ void ClickedStop()
 
 DWORD WINAPI mouseClickThread(LPVOID lpThreadParameter)
 {
-    do
+    int directioni = ComboBox_GetCurSel(mouse.ComboDirection);
+    if (IsDlgButtonChecked(mouse.Dlg, IDC_RANDOM))
     {
-        switch (mouse.direction)
+        DWORD sleep;
+        wchar_t sleept[10];
+        do
         {
-        case 0: //左键点击
-            mouse_event(MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
-            break;
-        case 1: //中键点击
-            mouse_event(MOUSEEVENTF_MIDDLEDOWN | MOUSEEVENTF_MIDDLEUP, 0, 0, 0, 0);
-            break;
-        case 2: //右键点击
-            mouse_event(MOUSEEVENTF_RIGHTDOWN | MOUSEEVENTF_RIGHTUP, 0, 0, 0, 0);
-            break;
-        }
-        if (mouse.isRandomDelay)
-        {
-            DWORD sleep = 1 + rand() % mouse.delay;
-            wchar_t sleept[10];
+            mouse_event(mouse.directions[directioni], 0, 0, 0, 0);
+            sleep = rand() % mouse.delay;
             SetDlgItemTextW(mouse.Dlg, IDC_DELAY, _itow(sleep, sleept, 10));
             Sleep(sleep);
-        }
-        else
+        } while (mouse.flag);
+    }
+    else
+    {
+        do
+        {
+            mouse_event(mouse.directions[directioni], 0, 0, 0, 0);
             Sleep(mouse.delay);
-    } while (mouse.flag);
+        } while (mouse.flag);
+    }
     return 0;
 }
