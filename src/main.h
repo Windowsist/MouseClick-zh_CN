@@ -4,13 +4,12 @@
 #include <windowsx.h>
 #include "resource.h"
 
-struct MouseAction
+typedef struct
 {
-    MouseAction(HWND hDlg, DWORD delay, DWORD direction);
-    bool flag = true;
+    bool flag;
     HWND hDlg;
     DWORD delay, direction;
-};
+} MouseAction, *LPMouseAction;
 
 ATOM MyRegisterClass(HINSTANCE hInstance);
 

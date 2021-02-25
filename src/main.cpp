@@ -26,10 +26,6 @@ int
     return (int)msg.wParam;
 }
 
-MouseAction::MouseAction(HWND hDlg, DWORD delay, DWORD direction)
-    : hDlg(hDlg), delay(delay), direction(direction)
-{
-}
 //
 //  函数: MyRegisterClass()
 //
@@ -93,7 +89,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 // 对话框的消息处理程序。
 INT_PTR CALLBACK DlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
-    static MouseAction *lpMouseAction = nullptr;
+    static LPMouseAction lpMouseAction = nullptr;
     static DWORD directions[3] =
         {MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_LEFTUP,
          MOUSEEVENTF_MIDDLEDOWN | MOUSEEVENTF_MIDDLEUP,
@@ -171,7 +167,7 @@ INT_PTR CALLBACK DlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
                 {
                     wchar_t delay[10];
                     GetDlgItemTextW(hDlg, IDC_DELAY, delay, 10);
-                    lpMouseAction = new MouseAction(hDlg, _wtol(delay), directions[ComboBox_GetCurSel(GetDlgItem(hDlg, IDC_DIRECTION))]);
+                    lpMouseAction = new MouseAction{true, hDlg, (DWORD)_wtol(delay), directions[ComboBox_GetCurSel(GetDlgItem(hDlg, IDC_DIRECTION))]};
                 }
                 CreateThread(nullptr, 0, &mouseClickThread, lpMouseAction, 0, nullptr); //&mouse.mouseClickThreadID);
             }
@@ -185,18 +181,20 @@ INT_PTR CALLBACK DlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
         {
             if ((HWND)lParam == GetDlgItem(hDlg, IDC_KEY))
             {
-                static UINT HotKeys[12] =
-                    {VK_F1, VK_F2, VK_F3, VK_F4, VK_F5, VK_F6, VK_F7, VK_F8, VK_F9, VK_F10, VK_F11, VK_F12};
-                UINT hotKey = HotKeys[ComboBox_GetCurSel(GetDlgItem(hDlg, IDC_KEY))];
                 UnregisterHotKey(hDlg, 1);
                 UnregisterHotKey(hDlg, 2);
-                if (!RegisterHotKey(hDlg, 1, MOD_NOREPEAT | MOD_CONTROL, hotKey)) //0x42 is 'b'
                 {
-                    MessageBoxW(hDlg, L"注册快捷键失败", L"警告", MB_ICONWARNING);
-                }
-                if (!RegisterHotKey(hDlg, 2, MOD_NOREPEAT, hotKey)) //0x42 is 'b'
-                {
-                    MessageBoxW(hDlg, L"注册快捷键失败", L"警告", MB_ICONWARNING);
+                    static UINT HotKeys[12] =
+                        {VK_F1, VK_F2, VK_F3, VK_F4, VK_F5, VK_F6, VK_F7, VK_F8, VK_F9, VK_F10, VK_F11, VK_F12};
+                    UINT hotKey = HotKeys[ComboBox_GetCurSel(GetDlgItem(hDlg, IDC_KEY))];
+                    if (!RegisterHotKey(hDlg, 1, MOD_NOREPEAT | MOD_CONTROL, hotKey)) //0x42 is 'b'
+                    {
+                        MessageBoxW(hDlg, L"注册快捷键失败", L"警告", MB_ICONWARNING);
+                    }
+                    if (!RegisterHotKey(hDlg, 2, MOD_NOREPEAT, hotKey)) //0x42 is 'b'
+                    {
+                        MessageBoxW(hDlg, L"注册快捷键失败", L"警告", MB_ICONWARNING);
+                    }
                 }
                 return (INT_PTR)TRUE;
             }
@@ -217,21 +215,6 @@ INT_PTR CALLBACK DlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
                     SetDlgItemTextW(hDlg, IDC_DELAYLABEL, L"时间间隔：");
                 }
                 break;
-            case IDC_START:
-                EnableWindow(GetDlgItem(hDlg, IDC_START), FALSE);
-                EnableWindow(GetDlgItem(hDlg, IDC_DELAY), FALSE);
-                EnableWindow(GetDlgItem(hDlg, IDC_KEY), FALSE);
-                EnableWindow(GetDlgItem(hDlg, IDC_DIRECTION), FALSE);
-                EnableWindow(GetDlgItem(hDlg, IDC_RANDOM), FALSE);
-                EnableWindow(GetDlgItem(hDlg, IDC_STOP), TRUE);
-                {
-                    wchar_t delay[10];
-                    GetDlgItemTextW(hDlg, IDC_DELAY, delay, 10);
-                    lpMouseAction = new MouseAction(hDlg, _wtol(delay), directions[ComboBox_GetCurSel(GetDlgItem(hDlg, IDC_DIRECTION))]);
-                }
-                CreateThread(nullptr, 0, &mouseClickThread, lpMouseAction, 0, nullptr); //&mouse.mouseClickThreadID);
-
-                return (INT_PTR)TRUE;
             case IDC_STOP:
                 lpMouseAction->flag = false;
                 lpMouseAction = nullptr;
@@ -243,16 +226,32 @@ INT_PTR CALLBACK DlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
                 EnableWindow(GetDlgItem(hDlg, IDC_RANDOM), TRUE);
                 EnableWindow(GetDlgItem(hDlg, IDC_STOP), FALSE);
                 return (INT_PTR)TRUE;
+            case IDC_START:
+                EnableWindow(GetDlgItem(hDlg, IDC_START), FALSE);
+                EnableWindow(GetDlgItem(hDlg, IDC_DELAY), FALSE);
+                EnableWindow(GetDlgItem(hDlg, IDC_KEY), FALSE);
+                EnableWindow(GetDlgItem(hDlg, IDC_DIRECTION), FALSE);
+                EnableWindow(GetDlgItem(hDlg, IDC_RANDOM), FALSE);
+                EnableWindow(GetDlgItem(hDlg, IDC_STOP), TRUE);
+                {
+                    wchar_t delay[10];
+                    GetDlgItemTextW(hDlg, IDC_DELAY, delay, 10);
+                    lpMouseAction = new MouseAction{true, hDlg, (DWORD)_wtol(delay), directions[ComboBox_GetCurSel(GetDlgItem(hDlg, IDC_DIRECTION))]};
+                }
+                CreateThread(nullptr, 0, &mouseClickThread, lpMouseAction, 0, nullptr); //&mouse.mouseClickThreadID);
+                return (INT_PTR)TRUE;
             case IDC_TEST:
             case IDC_RESET:
             {
-                static int count = 0;
+                static DWORD count = 0;
                 switch (wmId)
                 {
                 case IDC_TEST:
+                {
                     wchar_t countt[10];
                     SetDlgItemTextW(hDlg, IDC_COUNT, _itow(++count, countt, 10));
-                    break;
+                }
+                break;
                 case IDC_RESET:
                     SetDlgItemTextW(hDlg, IDC_COUNT, L"0");
                     count = 0;
@@ -275,17 +274,18 @@ INT_PTR CALLBACK DlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 
 DWORD WINAPI mouseClickThread(LPVOID lpThreadParameter)
 {
-    MouseAction *lpMouseAction = (MouseAction *)lpThreadParameter;
+    LPMouseAction lpMouseAction = (LPMouseAction)lpThreadParameter;
     wchar_t sleept[10];
     if (IsDlgButtonChecked(lpMouseAction->hDlg, IDC_RANDOM))
     {
-        DWORD sleep;
         do
         {
             mouse_event(lpMouseAction->direction, 0, 0, 0, 0);
-            sleep = rand() % lpMouseAction->delay;
-            SetDlgItemTextW(lpMouseAction->hDlg, IDC_DELAYTRUE, _itow(sleep, sleept, 10));
-            Sleep(sleep);
+            {
+                DWORD sleep = rand() % lpMouseAction->delay;
+                SetDlgItemTextW(lpMouseAction->hDlg, IDC_DELAYTRUE, _itow(sleep, sleept, 10));
+                Sleep(sleep);
+            }
         } while (lpMouseAction->flag);
     }
     else
