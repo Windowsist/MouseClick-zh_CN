@@ -9,6 +9,7 @@ typedef MouseAction *LPMouseAction;
 class MouseAction
 {
 private:
+    // DWORD mouseClickThreadID;
     bool flag = true;
     const HWND hDlg;
     const DWORD delay, direction;
