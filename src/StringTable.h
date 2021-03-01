@@ -1,27 +1,36 @@
-﻿#include "pch.h"
+﻿#pragma once
+
+#include "pch.h"
+
+#define STCONTENT                  \
+    CONTENT(ClassName);            \
+    CONTENT(RegisterHotKeyFailed); \
+    CONTENT(Warning);              \
+    CONTENT(DefaultDelay);         \
+    CONTENT(Delaystr);             \
+    CONTENT(DelayMaxstr);          \
+    CONTENT(DefaultCount);         \
+    CONTENT(MouseL);               \
+    CONTENT(MouseM);               \
+    CONTENT(MouseR);               \
+    CONTENT(VK_F1);                \
+    CONTENT(VK_F2);                \
+    CONTENT(VK_F3);                \
+    CONTENT(VK_F4);                \
+    CONTENT(VK_F5);                \
+    CONTENT(VK_F6);                \
+    CONTENT(VK_F7);                \
+    CONTENT(VK_F8);                \
+    CONTENT(VK_F9);                \
+    CONTENT(VK_F10);               \
+    CONTENT(VK_F11);               \
+    CONTENT(VK_F12);
 
 void StringTableInit(HINSTANCE hInstance);
 
-extern LPWSTR szClassName;
-extern LPWSTR szRegisterHotKeyFailed;
-extern LPWSTR szWarning;
-extern LPWSTR szDefaultDelay;
-extern LPWSTR szDelaystr;
-extern LPWSTR szDelayMaxstr;
-extern LPWSTR szDelay;
-extern LPWSTR szDefaultCount;
-extern LPWSTR szMouseL;
-extern LPWSTR szMouseM;
-extern LPWSTR szMouseR;
-extern LPWSTR szVK_F1;
-extern LPWSTR szVK_F2;
-extern LPWSTR szVK_F3;
-extern LPWSTR szVK_F4;
-extern LPWSTR szVK_F5;
-extern LPWSTR szVK_F6;
-extern LPWSTR szVK_F7;
-extern LPWSTR szVK_F8;
-extern LPWSTR szVK_F9;
-extern LPWSTR szVK_F10;
-extern LPWSTR szVK_F11;
-extern LPWSTR szVK_F12;
+#define CONTENT(x) extern LPWSTR sz##x
+
+STCONTENT
+
+#undef CONTENT
+
