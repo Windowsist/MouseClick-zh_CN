@@ -4,3 +4,4 @@
 
 #include "main.h"
 #include "MouseAction.h"
+#include "StringTable.h"

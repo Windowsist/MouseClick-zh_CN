@@ -7,6 +7,7 @@ int
              _In_ LPWSTR lpCmdLine,
              _In_ int nCmdShow)
 {
+    StringTableInit(hInstance);
     MyRegisterClass(hInstance);
 
     // 执行应用程序初始化:
@@ -22,7 +23,7 @@ int
         TranslateMessage(&msg);
         DispatchMessageW(&msg);
     }
-
+    
     return (int)msg.wParam;
 }
 
@@ -46,7 +47,7 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
     wcex.hCursor = LoadCursorW(nullptr, IDC_ARROW);
     wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
     wcex.lpszMenuName = nullptr;
-    wcex.lpszClassName = L"MouseClickDlg";
+    wcex.lpszClassName = szClassName;
     wcex.hIconSm = wcex.hIcon;
 
     return RegisterClassExW(&wcex);
@@ -73,12 +74,12 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
     if (!RegisterHotKey(hDlg, 1, MOD_NOREPEAT | MOD_CONTROL, VK_F1)) //0x42 is 'b'
     {
-        MessageBoxW(nullptr, L"注册快捷键失败", L"警告", MB_ICONWARNING);
+        MessageBoxW(nullptr, szRegisterHotKeyFailed, szWarning, MB_ICONWARNING);
     }
 
     if (!RegisterHotKey(hDlg, 2, MOD_NOREPEAT, VK_F1)) //0x42 is 'b'
     {
-        MessageBoxW(nullptr, L"注册快捷键失败", L"警告", MB_ICONWARNING);
+        MessageBoxW(nullptr, szRegisterHotKeyFailed, szWarning, MB_ICONWARNING);
     }
 
     ShowWindow(hDlg, nCmdShow);
@@ -92,30 +93,30 @@ INT_PTR CALLBACK DlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
     switch (message)
     {
     case WM_INITDIALOG:
-        SetDlgItemTextW(hDlg, IDC_DELAY, L"1000");
-        SetDlgItemTextW(hDlg, IDC_DELAYTRUE, L"1000");
-        SetDlgItemTextW(hDlg, IDC_COUNT, L"0");
+        SetDlgItemTextW(hDlg, IDC_DELAY, szDefaultDelay);
+        SetDlgItemTextW(hDlg, IDC_DELAYTRUE, szDefaultDelay);
+        SetDlgItemTextW(hDlg, IDC_COUNT, szDefaultCount);
         {
             HWND comboDir = GetDlgItem(hDlg, IDC_DIRECTION);
-            ComboBox_AddItemData(comboDir, L"鼠标左键");
-            ComboBox_AddItemData(comboDir, L"鼠标中键");
-            ComboBox_AddItemData(comboDir, L"鼠标右键");
+            ComboBox_AddItemData(comboDir, szMouseL);
+            ComboBox_AddItemData(comboDir, szMouseM);
+            ComboBox_AddItemData(comboDir, szMouseR);
             ComboBox_SetCurSel(comboDir, 0);
         }
         {
             HWND comboKey = GetDlgItem(hDlg, IDC_KEY);
-            ComboBox_AddItemData(comboKey, L"F1");
-            ComboBox_AddItemData(comboKey, L"F2");
-            ComboBox_AddItemData(comboKey, L"F3");
-            ComboBox_AddItemData(comboKey, L"F4");
-            ComboBox_AddItemData(comboKey, L"F5");
-            ComboBox_AddItemData(comboKey, L"F6");
-            ComboBox_AddItemData(comboKey, L"F7");
-            ComboBox_AddItemData(comboKey, L"F8");
-            ComboBox_AddItemData(comboKey, L"F9");
-            ComboBox_AddItemData(comboKey, L"F10");
-            ComboBox_AddItemData(comboKey, L"F11");
-            ComboBox_AddItemData(comboKey, L"F12");
+            ComboBox_AddItemData(comboKey, szVK_F1);
+            ComboBox_AddItemData(comboKey, szVK_F2);
+            ComboBox_AddItemData(comboKey, szVK_F3);
+            ComboBox_AddItemData(comboKey, szVK_F4);
+            ComboBox_AddItemData(comboKey, szVK_F5);
+            ComboBox_AddItemData(comboKey, szVK_F6);
+            ComboBox_AddItemData(comboKey, szVK_F7);
+            ComboBox_AddItemData(comboKey, szVK_F8);
+            ComboBox_AddItemData(comboKey, szVK_F9);
+            ComboBox_AddItemData(comboKey, szVK_F10);
+            ComboBox_AddItemData(comboKey, szVK_F11);
+            ComboBox_AddItemData(comboKey, szVK_F12);
             ComboBox_SetCurSel(comboKey, 0);
         }
         return (INT_PTR)TRUE;
@@ -166,11 +167,11 @@ INT_PTR CALLBACK DlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
                     UINT hotKey = HotKeys[ComboBox_GetCurSel(GetDlgItem(hDlg, IDC_KEY))];
                     if (!RegisterHotKey(hDlg, 1, MOD_NOREPEAT | MOD_CONTROL, hotKey)) //0x42 is 'b'
                     {
-                        MessageBoxW(hDlg, L"注册快捷键失败", L"警告", MB_ICONWARNING);
+                        MessageBoxW(hDlg, szRegisterHotKeyFailed, szWarning, MB_ICONWARNING);
                     }
                     if (!RegisterHotKey(hDlg, 2, MOD_NOREPEAT, hotKey)) //0x42 is 'b'
                     {
-                        MessageBoxW(hDlg, L"注册快捷键失败", L"警告", MB_ICONWARNING);
+                        MessageBoxW(hDlg, szRegisterHotKeyFailed, szWarning, MB_ICONWARNING);
                     }
                 }
                 return (INT_PTR)TRUE;
@@ -185,11 +186,11 @@ INT_PTR CALLBACK DlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
             case IDC_RANDOM:
                 if (IsDlgButtonChecked(hDlg, IDC_RANDOM))
                 {
-                    SetDlgItemTextW(hDlg, IDC_DELAYLABEL, L"最大间隔：");
+                    SetDlgItemTextW(hDlg, IDC_DELAYLABEL, szDelayMaxstr);
                 }
                 else
                 {
-                    SetDlgItemTextW(hDlg, IDC_DELAYLABEL, L"时间间隔：");
+                    SetDlgItemTextW(hDlg, IDC_DELAYLABEL, szDelaystr);
                 }
                 break;
             case IDC_STOP:
@@ -211,7 +212,7 @@ INT_PTR CALLBACK DlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
                 }
                 break;
                 case IDC_RESET:
-                    SetDlgItemTextW(hDlg, IDC_COUNT, L"0");
+                    SetDlgItemTextW(hDlg, IDC_COUNT, szDefaultCount);
                     count = 0;
                     break;
                 }
