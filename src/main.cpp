@@ -89,17 +89,12 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 // 对话框的消息处理程序。
 INT_PTR CALLBACK DlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
-    static LPMouseAction lpMouseAction = nullptr;
-    static DWORD directions[3] =
-        {MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_LEFTUP,
-         MOUSEEVENTF_MIDDLEDOWN | MOUSEEVENTF_MIDDLEUP,
-         MOUSEEVENTF_RIGHTDOWN | MOUSEEVENTF_RIGHTUP};
     switch (message)
     {
     case WM_INITDIALOG:
-        SetDlgItemText(hDlg, IDC_DELAY, L"1000");
-        SetDlgItemText(hDlg, IDC_DELAYTRUE, L"1000");
-        SetDlgItemText(hDlg, IDC_COUNT, L"0");
+        SetDlgItemTextW(hDlg, IDC_DELAY, L"1000");
+        SetDlgItemTextW(hDlg, IDC_DELAYTRUE, L"1000");
+        SetDlgItemTextW(hDlg, IDC_COUNT, L"0");
         {
             HWND comboDir = GetDlgItem(hDlg, IDC_DIRECTION);
             ComboBox_AddItemData(comboDir, L"鼠标左键");
@@ -144,32 +139,14 @@ INT_PTR CALLBACK DlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
         }
             return (INT_PTR)TRUE;
         case 2:
-            if (lpMouseAction)
+            if (MouseAction::IsRunning())
             {
-                lpMouseAction->flag = false;
-                lpMouseAction = nullptr;
-                // ResumeThread(&mouse.mouseClickThreadID);
-                EnableWindow(GetDlgItem(hDlg, IDC_START), TRUE);
-                EnableWindow(GetDlgItem(hDlg, IDC_DELAY), TRUE);
-                EnableWindow(GetDlgItem(hDlg, IDC_KEY), TRUE);
-                EnableWindow(GetDlgItem(hDlg, IDC_DIRECTION), TRUE);
-                EnableWindow(GetDlgItem(hDlg, IDC_RANDOM), TRUE);
-                EnableWindow(GetDlgItem(hDlg, IDC_STOP), FALSE);
+                MouseAction::StopClick(hDlg);
             }
             else
             {
-                EnableWindow(GetDlgItem(hDlg, IDC_START), FALSE);
-                EnableWindow(GetDlgItem(hDlg, IDC_DELAY), FALSE);
-                EnableWindow(GetDlgItem(hDlg, IDC_KEY), FALSE);
-                EnableWindow(GetDlgItem(hDlg, IDC_DIRECTION), FALSE);
-                EnableWindow(GetDlgItem(hDlg, IDC_RANDOM), FALSE);
-                EnableWindow(GetDlgItem(hDlg, IDC_STOP), TRUE);
-                {
-                    wchar_t delay[10];
-                    GetDlgItemTextW(hDlg, IDC_DELAY, delay, 10);
-                    lpMouseAction = new MouseAction{true, hDlg, (DWORD)_wtol(delay), directions[ComboBox_GetCurSel(GetDlgItem(hDlg, IDC_DIRECTION))]};
-                }
-                CreateThread(nullptr, 0, &mouseClickThread, lpMouseAction, 0, nullptr); //&mouse.mouseClickThreadID);
+
+                MouseAction::StartClick(hDlg);
             }
             return (INT_PTR)TRUE;
         }
@@ -216,29 +193,10 @@ INT_PTR CALLBACK DlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
                 }
                 break;
             case IDC_STOP:
-                lpMouseAction->flag = false;
-                lpMouseAction = nullptr;
-                // ResumeThread(&mouse.mouseClickThreadID);
-                EnableWindow(GetDlgItem(hDlg, IDC_START), TRUE);
-                EnableWindow(GetDlgItem(hDlg, IDC_DELAY), TRUE);
-                EnableWindow(GetDlgItem(hDlg, IDC_KEY), TRUE);
-                EnableWindow(GetDlgItem(hDlg, IDC_DIRECTION), TRUE);
-                EnableWindow(GetDlgItem(hDlg, IDC_RANDOM), TRUE);
-                EnableWindow(GetDlgItem(hDlg, IDC_STOP), FALSE);
+                MouseAction::StopClick(hDlg);
                 return (INT_PTR)TRUE;
             case IDC_START:
-                EnableWindow(GetDlgItem(hDlg, IDC_START), FALSE);
-                EnableWindow(GetDlgItem(hDlg, IDC_DELAY), FALSE);
-                EnableWindow(GetDlgItem(hDlg, IDC_KEY), FALSE);
-                EnableWindow(GetDlgItem(hDlg, IDC_DIRECTION), FALSE);
-                EnableWindow(GetDlgItem(hDlg, IDC_RANDOM), FALSE);
-                EnableWindow(GetDlgItem(hDlg, IDC_STOP), TRUE);
-                {
-                    wchar_t delay[10];
-                    GetDlgItemTextW(hDlg, IDC_DELAY, delay, 10);
-                    lpMouseAction = new MouseAction{true, hDlg, (DWORD)_wtol(delay), directions[ComboBox_GetCurSel(GetDlgItem(hDlg, IDC_DIRECTION))]};
-                }
-                CreateThread(nullptr, 0, &mouseClickThread, lpMouseAction, 0, nullptr); //&mouse.mouseClickThreadID);
+                MouseAction::StartClick(hDlg);
                 return (INT_PTR)TRUE;
             case IDC_TEST:
             case IDC_RESET:
@@ -270,33 +228,4 @@ INT_PTR CALLBACK DlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
         return (INT_PTR)TRUE;
     }
     return (INT_PTR)FALSE;
-}
-
-DWORD WINAPI mouseClickThread(LPVOID lpThreadParameter)
-{
-    LPMouseAction lpMouseAction = (LPMouseAction)lpThreadParameter;
-    wchar_t sleept[10];
-    if (IsDlgButtonChecked(lpMouseAction->hDlg, IDC_RANDOM))
-    {
-        do
-        {
-            mouse_event(lpMouseAction->direction, 0, 0, 0, 0);
-            {
-                DWORD sleep = rand() % lpMouseAction->delay;
-                SetDlgItemTextW(lpMouseAction->hDlg, IDC_DELAYTRUE, _itow(sleep, sleept, 10));
-                Sleep(sleep);
-            }
-        } while (lpMouseAction->flag);
-    }
-    else
-    {
-        SetDlgItemTextW(lpMouseAction->hDlg, IDC_DELAYTRUE, _itow(lpMouseAction->delay, sleept, 10));
-        do
-        {
-            mouse_event(lpMouseAction->direction, 0, 0, 0, 0);
-            Sleep(lpMouseAction->delay);
-        } while (lpMouseAction->flag);
-    }
-    delete lpMouseAction;
-    return 0;
 }
