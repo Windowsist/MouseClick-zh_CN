@@ -31,7 +31,7 @@ void MouseAction::StartClick(HWND hDlg)
         GetDlgItemTextW(hDlg, IDC_DELAY, delay, 10);
         lpMouseAction = new MouseAction(hDlg, (DWORD)_wtol(delay), directions[ComboBox_GetCurSel(GetDlgItem(hDlg, IDC_DIRECTION))]);
     }
-    CreateThread(nullptr, 0, &mouseClickThread, lpMouseAction, 0, nullptr); //&mouse.mouseClickThreadID);
+    CreateThread(nullptr, 0, mouseClickThread, lpMouseAction, 0, nullptr); //&mouse.mouseClickThreadID);
 }
 
 void MouseAction::StopClick(HWND hDlg)
