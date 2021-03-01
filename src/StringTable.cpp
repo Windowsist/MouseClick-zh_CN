@@ -5,7 +5,6 @@
 void StringTableInit(HINSTANCE hInstance)
 {
     LOADS(ClassName);
-    LOADS(ClassName);
     LOADS(RegisterHotKeyFailed);
     LOADS(Warning);
     LOADS(DefaultDelay);
