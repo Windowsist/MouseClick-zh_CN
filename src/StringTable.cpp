@@ -28,6 +28,8 @@ void StringTableInit(HINSTANCE hInstance)
     LOADS(VK_F12);
 }
 
+#undef LOADS
+
 LPWSTR szClassName;
 LPWSTR szRegisterHotKeyFailed;
 LPWSTR szWarning;
