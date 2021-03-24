@@ -1,4 +1,5 @@
-﻿#include "main.h"
+﻿
+#include "pch.h"
 
 int
     WINAPI
@@ -208,7 +209,8 @@ INT_PTR CALLBACK DlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
                 case IDC_TEST:
                 {
                     wchar_t countt[10];
-                    SetDlgItemTextW(hDlg, IDC_COUNT, _itow(++count, countt, 10));
+                    _itow_s(++count,countt,10);
+                    SetDlgItemTextW(hDlg, IDC_COUNT, countt);
                 }
                 break;
                 case IDC_RESET:

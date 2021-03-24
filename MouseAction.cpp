@@ -1,4 +1,5 @@
-﻿#include "MouseAction.h"
+﻿
+#include "pch.h"
 
 LPMouseAction MouseAction::lpMouseAction = nullptr;
 const DWORD MouseAction::directions[3] = {
@@ -50,25 +51,29 @@ void MouseAction::StopClick(HWND hDlg)
 DWORD WINAPI MouseAction::mouseClickThread(LPVOID lpThreadParameter)
 {
     LPMouseAction lpMouseAction = (LPMouseAction)lpThreadParameter;
+    static auto input = INPUT({ 0, MOUSEINPUT({0L, 0L, 0UL, 0UL, 0UL, 0ULL}) });
+    input.mi.dwFlags = lpMouseAction->direction;
     wchar_t sleept[10];
     if (IsDlgButtonChecked(lpMouseAction->hDlg, IDC_RANDOM))
     {
         do
         {
-            mouse_event(lpMouseAction->direction, 0, 0, 0, 0);
+            SendInput(1U, &input, sizeof(INPUT));
             {
                 DWORD sleep = rand() % lpMouseAction->delay;
-                SetDlgItemTextW(lpMouseAction->hDlg, IDC_DELAYTRUE, _itow(sleep, sleept, 10));
+                _itow_s(sleep, sleept, 10);
+                SetDlgItemTextW(lpMouseAction->hDlg, IDC_DELAYTRUE, sleept);
                 Sleep(sleep);
             }
         } while (lpMouseAction->flag);
     }
     else
     {
-        SetDlgItemTextW(lpMouseAction->hDlg, IDC_DELAYTRUE, _itow(lpMouseAction->delay, sleept, 10));
+        _itow_s(lpMouseAction->delay, sleept, 10);
+        SetDlgItemTextW(lpMouseAction->hDlg, IDC_DELAYTRUE, sleept);
         do
         {
-            mouse_event(lpMouseAction->direction, 0, 0, 0, 0);
+            SendInput(1U, &input, sizeof(INPUT));
             Sleep(lpMouseAction->delay);
         } while (lpMouseAction->flag);
     }
