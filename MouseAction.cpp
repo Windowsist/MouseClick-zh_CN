@@ -51,6 +51,7 @@ void MouseAction::StopClick(HWND hDlg)
 DWORD WINAPI MouseAction::mouseClickThread(LPVOID lpThreadParameter)
 {
     LPMouseAction lpMouseAction = (LPMouseAction)lpThreadParameter;
+    // only one thread can access this variable
     static auto input = INPUT({ 0, MOUSEINPUT({0L, 0L, 0UL, 0UL, 0UL, 0ULL}) });
     input.mi.dwFlags = lpMouseAction->direction;
     wchar_t sleept[10];
