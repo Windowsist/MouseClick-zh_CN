@@ -61,4 +61,7 @@
       <Filter>资源文件</Filter>
     </ResourceCompile>
   </ItemGroup>
+  <ItemGroup>
+    <Library Include="ucrtbase.lib" />
+  </ItemGroup>
 </Project>

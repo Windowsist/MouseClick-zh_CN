@@ -35,9 +35,7 @@ int
 //
 ATOM MyRegisterClass(HINSTANCE hInstance)
 {
-    WNDCLASSEXW wcex;
-
-    wcex.cbSize = sizeof(WNDCLASSEX);
+    WNDCLASSW wcex;
 
     wcex.style = CS_HREDRAW | CS_VREDRAW;
     wcex.lpfnWndProc = DefDlgProcW;
@@ -49,9 +47,8 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
     wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
     wcex.lpszMenuName = nullptr;
     wcex.lpszClassName = szClassName;
-    wcex.hIconSm = wcex.hIcon;
 
-    return RegisterClassExW(&wcex);
+    return RegisterClassW(&wcex);
 }
 
 //
