@@ -62,6 +62,6 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <Library Include="ucrtbase.lib" />
+    <Library Include="api-ms-win-crt-private-l1-1-0.lib" />
   </ItemGroup>
 </Project>
