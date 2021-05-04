@@ -4,22 +4,20 @@
 #include "StringTable.h"
 #include "MouseAction.h"
 
-
 int
 WINAPI
 wWinMain(
-    _In_ HINSTANCE /* hInstance */,
+    _In_ HINSTANCE hInstance,
     _In_opt_ HINSTANCE /* hPrevInstance */,
     _In_ LPWSTR /* lpCmdLine */,
-    _In_ int /* nShowCmd */
+    _In_ int nShowCmd
 )
 {
-    HINSTANCE hInstance = GetModuleHandleW(L"MouseClick.dll");
     StringTableInit(hInstance);
     MyRegisterClass(hInstance);
 
     // 执行应用程序初始化:
-    if (!InitInstance(hInstance, SW_SHOWDEFAULT))
+    if (!InitInstance(hInstance, nShowCmd))
     {
         return FALSE;
     }
@@ -42,22 +40,20 @@ wWinMain(
 //
 ATOM MyRegisterClass(HINSTANCE hInstance)
 {
-    WNDCLASSEXW wcex;
+    WNDCLASSW wcex;
 
-    wcex.cbSize = sizeof(WNDCLASSEXW);
     wcex.style = CS_HREDRAW | CS_VREDRAW;
     wcex.lpfnWndProc = DefDlgProcW;
     wcex.cbClsExtra = 0;
     wcex.cbWndExtra = DLGWINDOWEXTRA;
     wcex.hInstance = hInstance;
-    wcex.hIcon = LoadIconW(nullptr, IDI_APPLICATION);
+    wcex.hIcon = LoadIconW(hInstance, MAKEINTRESOURCEW(IDI_ICON1));
     wcex.hCursor = LoadCursorW(nullptr, IDC_ARROW);
     wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
     wcex.lpszMenuName = nullptr;
     wcex.lpszClassName = szClassName;
-    wcex.hIconSm = LoadIconW(hInstance, MAKEINTRESOURCEW(IDI_ICON1));
 
-    return RegisterClassExW(&wcex);
+    return RegisterClassW(&wcex);
 }
 
 //
