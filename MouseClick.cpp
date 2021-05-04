@@ -3,6 +3,7 @@
 #include "MouseClick.h"
 #include "StringTable.h"
 #include "MouseAction.h"
+#include "resource.h"
 
 int
 WINAPI

@@ -5,4 +5,3 @@
 #include <windowsx.h>
 
 #include <stdlib.h>
-#include "resource.h"

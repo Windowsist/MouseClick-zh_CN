@@ -1,6 +1,7 @@
 ﻿
 #include "pch.h"
 #include "MouseAction.h"
+#include "resource.h"
 
 LPMouseAction MouseAction::lpMouseAction = nullptr;
 const DWORD MouseAction::directions[3] = {
