@@ -1,5 +1,6 @@
 ﻿
 #include "pch.h"
+#include "StringTable.h"
 
 #define CONTENT(x) LoadStringW(hInstance, IDS_##x, (LPWSTR)&sz##x, 0)
 

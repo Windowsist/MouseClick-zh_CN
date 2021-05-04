@@ -1,18 +1,19 @@
 ﻿
 #include "pch.h"
+#include "MouseClick.h"
+#include "StringTable.h"
+#include "MouseAction.h"
 
-int
-    WINAPI
-    wWinMain(_In_ HINSTANCE hInstance,
-             _In_opt_ HINSTANCE hPrevInstance,
-             _In_ LPWSTR lpCmdLine,
-             _In_ int nCmdShow)
+extern "C"
+__declspec(dllexport)
+int MouseClickMain()
 {
+    HINSTANCE hInstance = GetModuleHandleW(L"MouseClick.dll");
     StringTableInit(hInstance);
     MyRegisterClass(hInstance);
 
     // 执行应用程序初始化:
-    if (!InitInstance(hInstance, nCmdShow))
+    if (!InitInstance(hInstance, SW_SHOWDEFAULT))
     {
         return FALSE;
     }
@@ -24,8 +25,8 @@ int
         TranslateMessage(&msg);
         DispatchMessageW(&msg);
     }
-    
-    return (int)msg.wParam;
+    ExitProcess((int)msg.wParam);
+    return 0;
 }
 
 //
@@ -35,20 +36,22 @@ int
 //
 ATOM MyRegisterClass(HINSTANCE hInstance)
 {
-    WNDCLASSW wcex;
+    WNDCLASSEXW wcex;
 
+    wcex.cbSize = sizeof(WNDCLASSEXW);
     wcex.style = CS_HREDRAW | CS_VREDRAW;
     wcex.lpfnWndProc = DefDlgProcW;
     wcex.cbClsExtra = 0;
     wcex.cbWndExtra = DLGWINDOWEXTRA;
     wcex.hInstance = hInstance;
-    wcex.hIcon = LoadIconW(hInstance, MAKEINTRESOURCEW(IDI_ICON1));
+    wcex.hIcon = LoadIconW(nullptr,IDI_APPLICATION);
     wcex.hCursor = LoadCursorW(nullptr, IDC_ARROW);
     wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
     wcex.lpszMenuName = nullptr;
     wcex.lpszClassName = szClassName;
+    wcex.hIconSm = LoadIconW(hInstance, MAKEINTRESOURCEW(IDI_ICON1));
 
-    return RegisterClassW(&wcex);
+    return RegisterClassExW(&wcex);
 }
 
 //
@@ -136,7 +139,7 @@ INT_PTR CALLBACK DlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
                 ShowWindow(hDlg, SW_SHOW);
             }
         }
-            return (INT_PTR)TRUE;
+        return (INT_PTR)TRUE;
         case 2:
             if (MouseAction::IsRunning())
             {
@@ -161,7 +164,7 @@ INT_PTR CALLBACK DlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
                 UnregisterHotKey(hDlg, 2);
                 {
                     static UINT HotKeys[12] =
-                        {VK_F1, VK_F2, VK_F3, VK_F4, VK_F5, VK_F6, VK_F7, VK_F8, VK_F9, VK_F10, VK_F11, VK_F12};
+                    { VK_F1, VK_F2, VK_F3, VK_F4, VK_F5, VK_F6, VK_F7, VK_F8, VK_F9, VK_F10, VK_F11, VK_F12 };
                     UINT hotKey = HotKeys[ComboBox_GetCurSel(GetDlgItem(hDlg, IDC_KEY))];
                     if (!RegisterHotKey(hDlg, 1, MOD_NOREPEAT | MOD_CONTROL, hotKey)) //0x42 is 'b'
                     {
@@ -206,7 +209,7 @@ INT_PTR CALLBACK DlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
                 case IDC_TEST:
                 {
                     wchar_t countt[10];
-                    _itow_s(++count,countt,10);
+                    _itow_s(++count, countt, 10);
                     SetDlgItemTextW(hDlg, IDC_COUNT, countt);
                 }
                 break;

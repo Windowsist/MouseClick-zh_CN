@@ -1,7 +1,5 @@
 ﻿#pragma once
 
-#include "pch.h"
-
 #define STCONTENT                  \
     CONTENT(ClassName);            \
     CONTENT(RegisterHotKeyFailed); \
