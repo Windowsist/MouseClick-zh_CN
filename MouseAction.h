@@ -1,7 +1,5 @@
 ﻿#pragma once
 
-#include "pch.h"
-
 class MouseAction;
 
 typedef MouseAction *LPMouseAction;
