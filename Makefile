@@ -4,13 +4,11 @@ HEADERS=MouseClick.h MouseAction.h StringTable.h
 
 build:MouseClick.dll MouseClick.exe
 
-MouseClick.exe: pch.pch pch.obj MouseClick_exe.cpp Windowsist.GUI.manifest MouseClick.lib
-	$(CPP) $(CPPFLAGS) /Yu"pch.h" /Fp: "pch.pch" MouseClick_exe.cpp /link /ENTRY:MouseClickMain /SUBSYSTEM:WINDOWS /MANIFESTINPUT:Windowsist.GUI.manifest /MANIFEST:EMBED pch.obj MouseClick.lib
-	if exist MouseClick.exe del MouseClick.exe
-	ren MouseClick_exe.exe MouseClick.exe
+MouseClick.exe: MouseClick_exe.cpp Windowsist.GUI.manifest Resource_exe.res MouseClick.lib
+	$(CPP) $(CPPFLAGS) /Fe: MouseClick.exe MouseClick_exe.cpp /link /ENTRY:wWinMainCRTStartup /SUBSYSTEM:WINDOWS /MANIFESTINPUT:Windowsist.GUI.manifest /MANIFEST:EMBED Resource_exe.res pch.obj MouseClick.lib /NODEFAULTLIB
 
-MouseClick.dll: pch.pch pch.obj $(SRCS) $(HEADERS) Resource.res
-	$(CPP) $(CPPFLAGS) /LD /Yu"pch.h" /Fp: "pch.pch" $(SRCS) /link pch.obj Resource.res kernel32.lib user32.lib WindowsApp.lib
+MouseClick.dll: pch.pch pch.obj $(SRCS) $(HEADERS) MouseAction.def Resource.res
+	$(CPP) $(CPPFLAGS) /LD /Yu"pch.h" /Fp: "pch.pch" $(SRCS) /link /DEF:MouseAction.def pch.obj Resource.res noarg.obj kernel32.lib user32.lib WindowsApp.lib
 
 pch.pch: framework.h pch.h pch.cpp
 	$(CPP) $(CPPFLAGS) /c /Yc"pch.h" /Fp: "pch.pch" pch.cpp
