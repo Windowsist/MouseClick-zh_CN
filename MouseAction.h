@@ -1,11 +1,14 @@
 ﻿#pragma once
 
-class MouseAction;
+struct MouseAction;
 
-typedef MouseAction *LPMouseAction;
+typedef MouseAction* LPMouseAction;
 
-class MouseAction
+struct MouseAction
 {
+    static bool IsRunning();
+    static void StartClick(HWND hDlg);
+    static void StopClick(HWND hDlg);
 private:
     // DWORD mouseClickThreadID;
     bool flag = true;
@@ -15,10 +18,5 @@ private:
     static const DWORD directions[3];
     MouseAction(HWND hDlg, DWORD delay, DWORD direction);
     ~MouseAction();
-    static DWORD WINAPI mouseClickThread(LPVOID lpThreadParameter);
-
-public:
-    static bool IsRunning();
-    static void StartClick(HWND hDlg);
-    static void StopClick(HWND hDlg);
+    static DWORD WINAPI mouseClickThread(LPMouseAction lpMouseAction);
 };

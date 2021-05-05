@@ -4,10 +4,12 @@
 #include "resource.h"
 
 LPMouseAction MouseAction::lpMouseAction = nullptr;
-const DWORD MouseAction::directions[3] = {
+const DWORD MouseAction::directions[3] =
+{
     MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_LEFTUP,
     MOUSEEVENTF_MIDDLEDOWN | MOUSEEVENTF_MIDDLEUP,
-    MOUSEEVENTF_RIGHTDOWN | MOUSEEVENTF_RIGHTUP};
+    MOUSEEVENTF_RIGHTDOWN | MOUSEEVENTF_RIGHTUP
+};
 
 MouseAction::MouseAction(HWND hDlg, DWORD delay, DWORD direction)
     : hDlg(hDlg), delay(delay), direction(direction)
@@ -32,9 +34,9 @@ void MouseAction::StartClick(HWND hDlg)
     {
         wchar_t delay[10];
         GetDlgItemTextW(hDlg, IDC_DELAY, delay, 10);
-        lpMouseAction = new MouseAction(hDlg, (DWORD)_wtol(delay), directions[ComboBox_GetCurSel(GetDlgItem(hDlg, IDC_DIRECTION))]);
+        lpMouseAction = new MouseAction{ hDlg, (DWORD)_wtol(delay), directions[ComboBox_GetCurSel(GetDlgItem(hDlg, IDC_DIRECTION))] };
     }
-    CreateThread(nullptr, 0, mouseClickThread, lpMouseAction, 0, nullptr); //&mouseClickThreadID);
+    CreateThread(nullptr, 0, (LPTHREAD_START_ROUTINE)mouseClickThread, lpMouseAction, 0, nullptr); //&mouseClickThreadID);
 }
 
 void MouseAction::StopClick(HWND hDlg)
@@ -50,11 +52,10 @@ void MouseAction::StopClick(HWND hDlg)
     EnableWindow(GetDlgItem(hDlg, IDC_STOP), FALSE);
 }
 
-DWORD WINAPI MouseAction::mouseClickThread(LPVOID lpThreadParameter)
+DWORD WINAPI MouseAction::mouseClickThread(LPMouseAction lpMouseAction)
 {
-    LPMouseAction lpMouseAction = (LPMouseAction)lpThreadParameter;
     // only one thread can access this variable
-    static auto input = INPUT({ 0, MOUSEINPUT({0L, 0L, 0UL, 0UL, 0UL, 0ULL}) });
+    static auto input = INPUT{ 0, MOUSEINPUT{0L, 0L, 0UL, 0UL, 0UL, 0ULL} };
     input.mi.dwFlags = lpMouseAction->direction;
     wchar_t sleept[10];
     if (IsDlgButtonChecked(lpMouseAction->hDlg, IDC_RANDOM))
